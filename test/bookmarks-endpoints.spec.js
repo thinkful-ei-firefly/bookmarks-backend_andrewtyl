@@ -434,3 +434,281 @@ describe(`GET /api/bookmarks/:id`, () => {
         })
     })
 })
+
+describe.only(`PATCH /api/bookmarks/:id`, () => {
+    context('Given all fields are to be updated and met requirements and the url starts with http://', () => {
+        const testBookmarks = makeBookmarksArray()
+
+        beforeEach('insert bookmarks', () => {
+            return db
+                .into('bookmarks')
+                .insert(testBookmarks)
+        })
+
+
+        it('updates the bookmark and responds with a 204', () => {
+            let updatedBookmark = {
+                title: 'Updated Bookmark Title',
+                description: 'Updated Bookmark Description',
+                rating: 1,
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch(`/api/bookmarks/1`)
+                .send(updatedBookmark)
+                .expect(204)
+                .then(res => {
+                    updatedBookmark.id = 1;
+
+                    return supertest(app)
+                        .get('/api/bookmarks/1')
+                        .expect(updatedBookmark)
+                })
+        })
+    })
+
+    context('Given all fields are to be updated and met requirements and the url starts with https://', () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert bookmarks', () => {
+            return db
+                .into('bookmarks')
+                .insert(testBookmarks)
+        })
+
+
+        it('updates the bookmark and responds with a 204', () => {
+            let updatedBookmark = {
+                title: 'Updated Bookmark Title',
+                description: 'Updated Bookmark Description',
+                rating: 1,
+                url: "https://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch(`/api/bookmarks/1`)
+                .send(updatedBookmark)
+                .expect(204)
+                .then(res => {
+                    updatedBookmark.id = 1;
+
+                    return supertest(app)
+                        .get('/api/bookmarks/1')
+                        .expect(updatedBookmark)
+                })
+        })
+    })
+
+    context(`Given all fields are to be updated and met requirements and contains an XSS attack`, () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert bookmarks', () => {
+            return db
+                .into('bookmarks')
+                .insert(testBookmarks)
+        })
+
+        it(`Updates the bookmark with sanatized fields and responds with a 204`, () => {
+            let updatedBookmark = {
+                title: `Updated Bookmark Title with <script>alert('xss');</script>`,
+                description: `Updated Bookmark Description with <script>alert('xss');</script>`,
+                rating: 1,
+                url: `https://geekprank.com/fake-virus/<script>alert('xss');</script>`
+            }
+
+            return supertest(app)
+                .patch(`/api/bookmarks/1`)
+                .send(updatedBookmark)
+                .expect(204)
+                .then(res => {
+                    const expectedBookmark = {
+                        id: 1,
+                        title: xss(updatedBookmark.title),
+                        description: xss(updatedBookmark.description),
+                        rating: updatedBookmark.rating,
+                        url: xss(updatedBookmark.url)
+                    }
+
+                    return supertest(app)
+                        .get('/api/bookmarks/1')
+                        .expect(expectedBookmark)
+                })
+        })
+    })
+
+    context('Given all fields are missing in the patch request', () => {
+        const testBookmarks = makeBookmarksArray()
+        beforeEach('insert bookmarks', () => {
+            return db
+                .into('bookmarks')
+                .insert(testBookmarks)
+        })
+
+        it(`Returns a 400 error`, () => {
+            const emptyObject = {}
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(emptyObject)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given rating is not a number in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated Bookmark Title',
+                description: 'updated Bookmark Description',
+                rating: "5",
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given rating is a number less than 1 in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated Bookmark Title',
+                description: 'updated Bookmark Description',
+                rating: 0.9,
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given rating is a number greater than or equal to 6 in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated Bookmark Title',
+                description: 'updated Bookmark Description',
+                rating: 6,
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given title is not a string in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: false,
+                description: 'updated Bookmark Description',
+                rating: 1,
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given description is not a string in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated bookmark title',
+                description: true,
+                rating: 1,
+                url: "http://updatedbookmarkurl.com"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given url is not a string in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated bookmark title',
+                description: 'updated Bookmark Description',
+                rating: 5,
+                url: 7
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given url does not start with http:// or https:// in the fields to be updated', () => {
+        it('Returns a 400 error', () => {
+            const updatedBookmark = {
+                title: 'updated bookmark title',
+                description: 'updated Bookmark Description',
+                rating: 5,
+                url: "invalidurl"
+            }
+
+            return supertest(app)
+                .patch('/api/bookmarks/1')
+                .send(updatedBookmark)
+                .expect(res => {
+                    expect(400)
+                })
+        })
+    })
+
+    context('Given at least one but not all fields are present in the fields', () => {
+        beforeEach('insert bookmarks', () => {
+            const testBookmarks = makeBookmarksArray()
+            return db
+                .into('bookmarks')
+                .insert(testBookmarks)
+        })
+
+        it('updates the bookmark and responds with a 204', () => {
+            let updatedBookmark = {
+                title: 'Updated Bookmark Title'
+            }
+
+            return supertest(app)
+                .patch(`/api/bookmarks/1`)
+                .send(updatedBookmark)
+                .expect(204)
+                .then(res => {
+                    const testBookmarks = makeBookmarksArray()
+                    let expectedBookmark = testBookmarks[0]
+                    expectedBookmark.title = updatedBookmark.title
+
+                    return supertest(app)
+                        .get('/api/bookmarks/1')
+                        .expect(expectedBookmark)
+                })
+        })
+
+    })
+
+
+})

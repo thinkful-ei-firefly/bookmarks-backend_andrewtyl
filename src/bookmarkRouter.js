@@ -132,5 +132,71 @@ bookmarkRouter
       })
       .catch(next)
   })
+  .patch(bodyParser, (req, res, next) => {
+    let { title, description, url, rating } = req.body
+    let updatedFields = { title, description, url, rating }
+
+    if ((!(updatedFields.title)) && (!(updatedFields.description)) && (!(updatedFields.url)) && (!(updatedFields.rating))) {
+      return res.status(400).json({
+        error: { message: `Please submit a valid field to be updated` }
+      })
+    }
+
+    if ((updatedFields.title) && (!(typeof updatedFields.title === "string"))) {
+      return res.status(400).json({
+        error: { message: `The title field must be a string.` }
+      })
+    }
+
+    if ((updatedFields.description) && !(typeof updatedFields.description === "string")) {
+      return res.status(400).json({
+        error: { message: `The description field must be a string.` }
+      })
+    }
+
+    if ((updatedFields.url) && !(typeof updatedFields.url === "string")) {
+      return res.status(400).json({
+        error: { message: `The url field must be a string.` }
+      })
+    }
+
+    if ((updatedFields.url) && (!(updatedFields.url.slice(0, 7) === "http://")) && ((!(updatedFields.url.slice(0, 8) === "https://")))) {
+      return res.status(400).json({
+        error: { message: `URL must begin with 'http://' or 'https://'` }
+      })
+    }
+
+    if ((updatedFields.rating) && !(typeof updatedFields.rating === "number") || (updatedFields.rating >= 6) || (updatedFields.rating < 1)) {
+      return res.status(400).json({
+        error: { message: `Rating must be a number between 1 and 5` }
+      })
+    }
+
+    if (updatedFields.rating) {
+      updatedFields.rating = Math.floor(updatedFields.rating)
+    }
+
+    if (updatedFields.url) {
+      updatedFields.url = xss(updatedFields.url)
+    }
+
+    if (updatedFields.title) {
+      updatedFields.title = xss(updatedFields.title)
+    }
+
+    if (updatedFields.description) {
+      updatedFields.description = xss(updatedFields.description)
+    }
+
+    BookmarksService.updateBookmark(
+      req.app.get('db'),
+      req.params.id,
+      updatedFields
+    )
+      .then(() => {
+        res.status(204).end()
+      })
+      .catch(next)
+  })
 
 module.exports = bookmarkRouter;
