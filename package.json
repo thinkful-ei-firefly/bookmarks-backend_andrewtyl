@@ -1,11 +1,11 @@
 {
-  "name": "blogful-api_andrewtyl",
+  "name": "bookmarks-backend_andrewtyl",
   "version": "1.0.0",
-  "description": "8-30 / Andrew Jessen-Tyler / Databases with Express",
+  "description": "9-1 / Andrew Jessen-Tyler / RESTful APIs",
   "os": [
     "!win32"
   ],
-  "main": "index.js",
+  "main": "/src/server.js",
   "scripts": {
     "test": "mocha --require test/setup.js",
     "start": "node src/server.js",
@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thinkful-ei-firefly/blogful-api_andrewtyl.git"
+    "url": "https://github.com/thinkful-ei-firefly/bookmarks-backend_andrewtyl.git"
   },
   "engines": {
     "node": "12.9.1"
