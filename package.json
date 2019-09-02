@@ -1,0 +1,46 @@
+{
+  "name": "blogful-api_andrewtyl",
+  "version": "1.0.0",
+  "description": "8-30 / Andrew Jessen-Tyler / Databases with Express",
+  "os": [
+    "!win32"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require test/setup.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "predeploy": "npm audit",
+    "deploy": "git push heroku master",
+    "migrate": "postgrator --config postgrator-config.js"
+  },
+  "keywords": [],
+  "author": "Andrew Jessen-Tyler",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thinkful-ei-firefly/blogful-api_andrewtyl.git"
+  },
+  "engines": {
+    "node": "12.9.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cuid": "^2.1.6",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "helmet": "^3.20.1",
+    "knex": "^0.19.3",
+    "morgan": "^1.9.1",
+    "pg": "^7.12.1",
+    "winston": "^3.2.1",
+    "xss": "^1.0.6"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "nodemon": "^1.19.1",
+    "postgrator-cli": "^3.1.0",
+    "supertest": "^4.0.2"
+  }
+}
